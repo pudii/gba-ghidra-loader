@@ -1,0 +1,5 @@
+<opinions>
+	<constraint loader="GBA Loader" compilerSpecID="default">
+		<constraint primary="armv4t" processor="ARM" endian="little" size="32" variant="v4t" />
+	</constraint>
+</opinions>
