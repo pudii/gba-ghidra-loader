@@ -6,12 +6,13 @@ It parses the GBA Cartridge header of the ROM and sets the entry point according
 
 The whole technical information of the GBA is taken from and perfectly documented by [gbatek](https://problemkaputt.de/gbatek.htm).
 
+The functionality is tested using Ghidra 10.1.2.
 
 ## Installation
 
-### Install from release file
+### Install from release file (only applicable for specific ghidra version)
 
-1. Download the .zip Ghidra Extension from the releases tab
+1. Download the .zip Ghidra Extension from the releases tab for the specific version.
 2. Open Ghidra Project Window and add the loader by "File > Install Extensions"
 3. Select the + icon and choose the downloaded .zip file
 4. After importing, it should appear in the list. Click OK and restart Ghidra to use the loader.
