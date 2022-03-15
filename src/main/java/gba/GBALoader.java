@@ -183,7 +183,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			cartr_hdr_block.setExecute(true);
 
 			Address cartr_rom_start = flatAPI.toAddr(LOAD_BASE + cartr_hdr_size);
-			MemoryBlock cartr_rom_block = flatAPI.createMemoryBlock("rom", cartr_rom_start, provider.readBytes(cartr_hdr_size, 0x800000-cartr_hdr_size), false);
+			MemoryBlock cartr_rom_block = flatAPI.createMemoryBlock("rom", cartr_rom_start, provider.readBytes(cartr_hdr_size, provider.length()-cartr_hdr_size), false);
 			cartr_rom_block.setRead(true);
 			cartr_rom_block.setWrite(false);
 			cartr_rom_block.setExecute(true);
