@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ package gba;
 import java.io.IOException;
 import java.util.*;
 
-import generic.continues.RethrowContinuesFactory;
 import ghidra.app.util.Option;
 import ghidra.app.util.bin.ByteProvider;
 import ghidra.app.util.importer.MessageLog;
@@ -43,47 +42,47 @@ import ghidra.util.task.TaskMonitor;
  * This loader loads GameBoy Advance binary files, mapping the memory regions and setting an entry point.
  */
 public class GBALoader extends AbstractLibrarySupportLoader {
-	
+
 	private final long GBAH_ENTRY_OFFSET			= 0x00;
 	private final long GBAH_ENTRY_LEN				= 3;
 	private final byte GBAH_ENTRYINSTR_OFFSET		= 0x3;
 	private final byte GBAH_ENTRYINSTR				= (byte) 0xEA;
-	
+
 	private final long GBAH_NINTENDOLOGO_OFFSET		= 0x4;
 	private final long GBAH_NINTENDOLOGO_LEN		= 156;
 	private final byte[] GBAH_NINTENDOLOGO_FST		= {0x24, (byte) 0xFF, (byte) 0xAE, 0x51, 0x69, (byte) 0x9A, (byte) 0xA2, 0x21};
-	
+
 	private final long GBAH_GAMETITLE_OFFSET		= 0xA0;
 	private final long GBAH_GAMETITLE_LEN			= 12;
-	
+
 	private final long GBAH_GAMECODE_OFFSET			= 0xAC;
 	private final long GBAH_GAMECODE_LEN			= 4;
-	
+
 	private final long GBAH_MAKERCODE_OFFSET		= 0xB0;
 	private final long GBAH_MAKERCODE_LEN			= 2;
-	
+
 	private final long GBAH_FIXED_OFFSET			= 0xB2;
 	private final byte GBAH_FIXED					= (byte) 0x96;
-	
+
 	private final long GBAH_MAINUNIT_OFFSET			= 0xB3;
 	private final byte GBAH_MAINUNIT				= 0x00;
-	
+
 	private final long GBAH_DEVTYPE_OFFSET			= 0xB4;
-	
+
 	private final long GBAH_RESERVED_OFFSET			= 0xB5;
 	private final long GBAH_RESERVED_LEN			= 7;
 	private final byte[] GBAH_RESERVED				= {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	
+
 	private final long GBAH_SOFTVERS_OFFSET			= 0xBC;
-	
+
 	private final long GBAH_COMPLCHECK_OFFSET		= 0xBD;
-	
+
 	private final long GBAH_RESERVED2_OFFSET		= 0xBE;
 	private final long GBAH_RESERVED2_LEN			= 2;
 	private final short GBAH_RESERVED2				= 0x00;
-	
-	
-	
+
+
+
 	@Override
 	public String getName() {
 
@@ -93,38 +92,38 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 	@Override
 	public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
 		List<LoadSpec> loadSpecs = new ArrayList<>();
-		
+
 		// Compare the first 8 bytes of the Nintendo logo field. This is required and can be used to determine the filetype
 		byte[] nintendo_logo = provider.readBytes(GBAH_NINTENDOLOGO_OFFSET, 8);
 		if (!Arrays.equals(nintendo_logo, GBAH_NINTENDOLOGO_FST)) {
 			// Not a correct Nintendo Logo -> No valid GBA ROM
 			return loadSpecs;
 		}
-		
+
 		// Check for a fixed value 0x96
 		byte fixed_val = provider.readByte(GBAH_FIXED_OFFSET);
 		if (fixed_val != GBAH_FIXED) {
 			// The fixed value does not match -> No valid GBA ROM
 			return loadSpecs;
-		}	
-		
+		}
+
 		// Check for ARM branch opcode in the fourth byte (entry point branch)
 		byte entry_branch_instr = provider.readByte(GBAH_ENTRYINSTR_OFFSET);
 		if (entry_branch_instr != GBAH_ENTRYINSTR) {
 			// ARM opcode is no branch -> No valid GBA ROM
 			return loadSpecs;
 		}
-		
-		
+
+
 		// Alternative as this is only one option
 //		LanguageCompilerSpecPair gba_lcs = new LanguageCompilerSpecPair("ARM:LE:32:v4t", "default");
 //		loadSpecs.add(new LoadSpec(this, 0, gba_lcs, true));
-		
+
 		List<QueryResult> results = QueryOpinionService.query(getName(), "armv4t", null);
 		for (QueryResult result : results) {
 			loadSpecs.add(new LoadSpec(this, 0, result));
 		}
-		
+
 		return loadSpecs;
 	}
 
@@ -132,13 +131,13 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options,
 			Program program, TaskMonitor monitor, MessageLog log)
 			throws CancelledException, IOException {
-		
+
 		FlatProgramAPI flatAPI = new FlatProgramAPI(program);
-		
+
 		// First 192 (0xC0) bytes is the Cartridge header
 		// Load base is 0x80000000
 		long LOAD_BASE = 0x80000000;
-		
+
 		try {
 			Memory mem = program.getMemory();
 			MemoryBlock memblock;
@@ -172,7 +171,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			memblock.setRead(true);
 			memblock.setWrite(true);
 			memblock.setExecute(false);
-			
+
 			// ROM
 			// Cartridge header memory block
 			final long cartr_hdr_size = 0xC0;
@@ -187,21 +186,21 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			cartr_rom_block.setRead(true);
 			cartr_rom_block.setWrite(false);
 			cartr_rom_block.setExecute(true);
-			
+
 			mapIO(flatAPI, log);
-			
-			GBACartrHeader gbaHeader = GBACartrHeader.createGbaCartrHeader(RethrowContinuesFactory.INSTANCE, provider);
+
+			GBACartrHeader gbaHeader = GBACartrHeader.createGbaCartrHeader(provider);
 			DataType headerDataType = gbaHeader.toDataType();
 			flatAPI.createData(cartr_hdr_start, headerDataType);
-			
+
 			flatAPI.addEntryPoint(flatAPI.toAddr(LOAD_BASE + gbaHeader.getEntryOffset()));
 
-			
+
 		} catch (Exception e) {
 			log.appendException(e);
 		}
 	}
-	
+
 	private void mapIO(FlatProgramAPI flatAPI, MessageLog log) {
 		Address addr;
 		try {
@@ -425,7 +424,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.createLabel(addr, "FIFO_B", true);
 			flatAPI.setEOLComment(addr, "Channel B FIFO, Data 0-3");
 			flatAPI.createDWord(addr);
-			
+
 			// DMA Transfer Channels
 			addr = flatAPI.toAddr(0x40000B0);
 			flatAPI.createLabel(addr, "DMA0SAD", true);
@@ -491,7 +490,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.createLabel(addr, "DMA3CNT_H", true);
 			flatAPI.setEOLComment(addr, "DMA 3 Control");
 			flatAPI.createWord(addr);
-			
+
 			// Timer Registers
 			addr = flatAPI.toAddr(0x4000100);
 			flatAPI.createLabel(addr, "TM0CNT_L", true);
@@ -525,7 +524,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.createLabel(addr, "TM3CNT_H", true);
 			flatAPI.setEOLComment(addr, "Timer 3 Control");
 			flatAPI.createWord(addr);
-			
+
 			// Serial Communication (1)
 			addr = flatAPI.toAddr(0x4000120);
 			flatAPI.createLabel(addr, "SIODATA32", true);
@@ -543,7 +542,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.createLabel(addr, "SIODATA8", true);
 			flatAPI.setEOLComment(addr, "SIO Data (Normal-8bit and UART Mode)");
 			flatAPI.createWord(addr);
-			
+
 			// Keypad Input
 			addr = flatAPI.toAddr(0x4000130);
 			flatAPI.createLabel(addr, "KEYINPUT", true);
@@ -553,7 +552,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.createLabel(addr, "KEYCNT", true);
 			flatAPI.setEOLComment(addr, "Key Interrupt Control");
 			flatAPI.createWord(addr);
-			
+
 			// Serial Communication (2)
 			addr = flatAPI.toAddr(0x4000134);
 			flatAPI.createLabel(addr, "RCNT", true);
@@ -578,7 +577,7 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.createLabel(addr, "JOYSTAT", true);
 			flatAPI.setEOLComment(addr, "SIO JOY Bus Receive Status");
 			flatAPI.createWord(addr);
-			
+
 			// Interrupt, Waitstate, and Power-Down Control
 			addr = flatAPI.toAddr(0x4000200);
 			flatAPI.createLabel(addr, "IE", true);
@@ -605,8 +604,8 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 			flatAPI.setEOLComment(addr, "Undocumented - Power Down Control");
 			flatAPI.createByte(addr);
 
-		
-		
+
+
 		} catch (Exception e) {
 			log.appendException(e);
 		}
