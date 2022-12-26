@@ -22,18 +22,16 @@ import java.nio.ByteOrder;
 import org.python.bouncycastle.util.Arrays;
 
 
-
-import generic.continues.GenericFactory;
+import ghidra.app.util.bin.BinaryReader;
 import ghidra.app.util.bin.ByteProvider;
 import ghidra.app.util.bin.StructConverter;
-import ghidra.app.util.bin.format.FactoryBundledWithBinaryReader;
 import ghidra.program.model.data.ArrayDataType;
 import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.StructureDataType;
 import ghidra.util.exception.DuplicateNameException;
 
 public class GBACartrHeader implements StructConverter {
-	
+
 	private int h_rom_entry_point;// = new byte[4];
 	private byte[] h_nintendo_logo = new byte[156];
 	private String h_game_title;
@@ -46,23 +44,16 @@ public class GBACartrHeader implements StructConverter {
 	private byte h_software_vers;
 	private byte h_complement_check;
 	private byte[] h_reserved2 = new byte[2];
-	
-	private FactoryBundledWithBinaryReader reader;
-	
-	public static GBACartrHeader createGbaCartrHeader(GenericFactory factory, ByteProvider provider) throws IOException {
-		GBACartrHeader gbaHeader = (GBACartrHeader) factory.create(GBACartrHeader.class);
-		gbaHeader.initGBAHeader(factory, provider);
-		return gbaHeader;
+
+	private BinaryReader reader;
+
+	public static GBACartrHeader createGbaCartrHeader(ByteProvider provider) throws IOException {
+		return new GBACartrHeader(provider);
 	}
-	
-	/*
-	 * DO NOT USE THIS CONSTRUCTOR, USE create*(GenericFactory ...) FACTORY METHODS INSTEAD.
-	 */
-	public GBACartrHeader() {}
-	
-	private void initGBAHeader(GenericFactory factory, ByteProvider provider) throws IOException {
-		reader = new FactoryBundledWithBinaryReader(factory, provider, true);
-		
+
+	public GBACartrHeader(ByteProvider provider) throws IOException {
+		reader = new BinaryReader(provider, true);
+
 		h_rom_entry_point = reader.readNextInt();
 		//h_rom_entry_point = reader.readNextByteArray(4);
 		h_nintendo_logo = reader.readNextByteArray(156);
@@ -76,7 +67,6 @@ public class GBACartrHeader implements StructConverter {
 		h_software_vers = reader.readNextByte();
 		h_complement_check = reader.readNextByte();
 		h_reserved2 = reader.readNextByteArray(2);
-	
 	}
 
 	@Override
@@ -96,7 +86,7 @@ public class GBACartrHeader implements StructConverter {
 		headerStruct.add(BYTE, "h_software_vers", "Software Version");
 		headerStruct.add(BYTE, "h_complement_check", "Complement Check");
 		headerStruct.add(new ArrayDataType(BYTE, h_reserved2.length, 1), "h_reserved2", "Reserved area");
-		
+
 		return headerStruct;
 	}
 
@@ -105,10 +95,10 @@ public class GBACartrHeader implements StructConverter {
 		if ((entry & 0x3) == 0) {
 			return 4*entry;
 		}
-		
+
 		int aligned = (((entry & 0xFFFFFFFC) >> 2) + 1) << 2;
 		return 4*aligned;
 	}
-		
+
 
 }
