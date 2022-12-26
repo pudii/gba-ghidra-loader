@@ -135,8 +135,8 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 		FlatProgramAPI flatAPI = new FlatProgramAPI(program);
 
 		// First 192 (0xC0) bytes is the Cartridge header
-		// Load base is 0x80000000
-		long LOAD_BASE = 0x80000000;
+		// Load base is 0x08000000
+		long LOAD_BASE = 0x08000000;
 
 		try {
 			Memory mem = program.getMemory();
