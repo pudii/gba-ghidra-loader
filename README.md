@@ -6,7 +6,7 @@ It parses the GBA Cartridge header of the ROM and sets the entry point according
 
 The whole technical information of the GBA is taken from and perfectly documented by [gbatek](https://problemkaputt.de/gbatek.htm).
 
-The functionality is tested using Ghidra 11.4.3 and Ghidra 12.0.2.
+The functionality is tested using Ghidra 12.0.2. For Ghidra 11 and older check the releases section or checkout from older commit as API was changed in Ghidra 12.
 
 ## Installation
 
