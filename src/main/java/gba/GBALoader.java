@@ -128,11 +128,11 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 	}
 
 	@Override
-	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options,
-			Program program, TaskMonitor monitor, MessageLog log)
+	protected void load(Program program, ImporterSettings importerSettings) 
 			throws CancelledException, IOException {
-
 		FlatProgramAPI flatAPI = new FlatProgramAPI(program);
+		ByteProvider provider = importerSettings.provider();
+		MessageLog log = importerSettings.log();
 
 		// First 192 (0xC0) bytes is the Cartridge header
 		// Load base is 0x08000000
@@ -613,9 +613,9 @@ public class GBALoader extends AbstractLibrarySupportLoader {
 
 	@Override
 	public List<Option> getDefaultOptions(ByteProvider provider, LoadSpec loadSpec,
-			DomainObject domainObject, boolean isLoadIntoProgram) {
+			DomainObject domainObject, boolean isLoadIntoProgram, boolean mirrorFsLayout) {
 		List<Option> list =
-			super.getDefaultOptions(provider, loadSpec, domainObject, isLoadIntoProgram);
+			super.getDefaultOptions(provider, loadSpec, domainObject, isLoadIntoProgram, mirrorFsLayout);
 
 		// Note: If this loader has custom options, add them to 'list'
 		//list.add(new Option("Option name goes here", "Default option value goes here"));
