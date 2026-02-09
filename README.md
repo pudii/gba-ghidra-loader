@@ -32,7 +32,7 @@ The functionality is tested using Ghidra 10.2.2.
     $ gradle -PGHIDRA_INSTALL_DIR=<Absolute path to Ghidra>  
     ```
 3. Open Ghidra Project Window and add the loader by "File > Install Extensions"
-4. Select the + icon and choose the downloaded .zip file
+4. Select the + icon and choose the .zip file in the `./dist` directory 
 5. After importing, it should appear in the list. Click OK and restart Ghidra to use the loader.
 6. The next time importing a valid GBA ROM file, the "GBA Loader" should appear at the import window.
 
