@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.python.bouncycastle.util.Arrays;
 
 
 import ghidra.app.util.bin.BinaryReader;
